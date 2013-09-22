@@ -1,38 +1,41 @@
 class Cell
-    
-    attr_accessor :state, :row, :col, :grid
-    
-    # state = :alive or :dead
+
+    attr_accessor :state, :next_state, :row, :col, :grid
+
     def initialize(grid, state, row, col)
         @grid, @state, @row, @col = grid, state, row, col
-    end
-    
-    def next!
-        self.state == if alive?
-            [2,3].include?(count_neighbors) ? :alive : :dead
-        else
-            count_neighbors == 3 ? :alive : :dead
-        end
+        @next_state = nil
     end
 
     def alive?
-        state == :alive
+        state
     end
 
     def dead?
-        state == :dead
+        !state
     end
-    
-    private
+
+    def to_s
+        "#<Cell #{object_id}: row:#{row}  col:#{col}  state:#{state} >"
+    end
+
+    def calculate_next!
+        self.next_state = alive? ? [2,3].include?(alive_neighbors_count) : (alive_neighbors_count == 3)
+    end
+
+    def update_state!
+      self.state = self.next_state
+      self.next_state = nil
+    end
+
+    #private
     # count the total number of live neighbors
-    def count_neighbors
-        souls = 0
-        (-1..1).each do |offset_row|
-            (-1..1).each do |offset_col|
-              souls =+ 1 if grid.cell_at(row + offset_row, col + offset_col).alive?
-            end
-        end
+    def alive_neighbors_count
+        @neighbors ||= @grid.get_neighbors(row, col)
+        @neighbors.select{|c| c.alive?}.size
     end
-       
+
 end
+
+
 
